@@ -14,6 +14,7 @@ def main():
 	root = tk.Tk()
 	root.title('Catalogo de peliculas')
 	root.iconbitmap('src/img/2Movies_37443.ico')
+	root.minsize(width=850,height=470)
 
 	barra_menu(root)
 
