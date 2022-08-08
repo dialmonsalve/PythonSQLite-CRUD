@@ -1,7 +1,8 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk,messagebox
 from model.pelicula_dao import crear_tabla, borrar_tabla
-from model.pelicula_dao import Pelicula, guardar
+from model.pelicula_dao import Pelicula, guardar, listar, editar, eliminar
+
 
 def barra_menu(master):
 	barra_menu = tk.Menu(master)
@@ -25,8 +26,8 @@ class MiFrame(tk.Frame):
 
 		self.master = master
 		self.pack()
-		#self.config(bg="green")
-		
+
+		self.id_pelicula=None
 
 		self.campos_pelicula()
 		self.deshabitar_campos()
@@ -112,6 +113,8 @@ class MiFrame(tk.Frame):
 		self.boton_cancelar.config(state="normal")
 
 	def deshabitar_campos(self):
+		self.id_pelicula = None
+		
 		self.mi_nombre.set("")
 		self.mi_genero.set("")
 		self.mi_duracion.set("")
@@ -131,21 +134,37 @@ class MiFrame(tk.Frame):
 			self.mi_genero.get(),
 		)
 
-		guardar(pelicula)
+		if self.id_pelicula == None:
+
+			guardar(pelicula)
+		else:
+			editar(pelicula, self.id_pelicula)
+
+		self.tabla_peliculas()
 
 		self.deshabitar_campos()
 
 	def tabla_peliculas(self):
 
+		#Recuperar la lista de peliculas
+		self.lista_peliculas = listar()
+		self.lista_peliculas.reverse()
+
 		self.tabla = ttk.Treeview(self, columns=("Nombre", "Duracón", "Genero"))
-		self.tabla.grid(row = 4, column=0, columnspan=4)
+		self.tabla.grid(row = 4, column=0, columnspan=4, sticky="nse")
+
+		self.scroll = ttk.Scrollbar(self, orient="vertical", command=self.tabla.yview)
+		self.scroll.grid(row=4, column=4, sticky="nse")
+		self.tabla.configure(yscrollcommand=self.scroll.set)
 
 		self.tabla.heading("#0", text="ID")
 		self.tabla.heading("#1", text="NOMBRE")
 		self.tabla.heading("#2", text="DURACIÓN")
 		self.tabla.heading("#3", text="GENERO")
 
-		self.tabla.insert("", 0, text="1", values=("los vengadores", "2.35", "Accion"))
+
+		for p in self.lista_peliculas:
+			self.tabla.insert("", 0, text=p[0], values=(p[1], p[2], p[3]))
 
 		#Botones
 		self.boton_editar = tk.Button(self, text="Editar")
@@ -156,6 +175,7 @@ class MiFrame(tk.Frame):
 			cursor="hand2", 
 			activebackground="#35bd6f",
 			activeforeground="red",
+			command= self.editar_datos
 			)
 		self.boton_editar.grid(row=5, column=0, padx=10, pady=10)
 
@@ -167,5 +187,36 @@ class MiFrame(tk.Frame):
 			cursor="hand2", 
 			activebackground="#e15370",
 			activeforeground="white",
+			command=self.eliminar_datos
 			)
 		self.boton_eliminar.grid(row=5, column=2, padx=10, pady=10)
+
+	def editar_datos(self):
+		try:
+			self.id_pelicula = self.tabla.item(self.tabla.selection())['text']
+			self.nombre_pelicula = self.tabla.item(self.tabla.selection())['values'][0]
+			self.duracion_pelicula = self.tabla.item(self.tabla.selection())['values'][1]
+			self.genero_pelicula = self.tabla.item(self.tabla.selection())['values'][2]
+
+			self.habitar_campos()
+
+			self.entry_nombre.insert(0, self.nombre_pelicula)
+			self.entry_duracion.insert(0, self.duracion_pelicula)
+			self.entry_genero.insert(0, self.genero_pelicula)
+		except:
+			titulo = "Edición de datos"
+			mensaje = "No se ha seleccionado ningún registro"
+			messagebox.showerror(titulo, mensaje)
+
+	def eliminar_datos(self):
+		try:
+			self.id_pelicula = self.tabla.item(self.tabla.selection())['text']
+			eliminar(self.id_pelicula)
+
+			self.tabla_peliculas()
+			self.id_pelicula= None
+
+		except:
+			titulo = "Eliminar de datos"
+			mensaje = "No se ha seleccionado ningún registro"
+			messagebox.showerror(titulo, mensaje)
