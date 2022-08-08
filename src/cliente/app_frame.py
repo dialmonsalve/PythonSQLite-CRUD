@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk,messagebox
+
 from model.pelicula_dao import crear_tabla, borrar_tabla
 from model.pelicula_dao import Pelicula, guardar, listar, editar, eliminar
+from cliente.app_widgets import Boton, CajaTexto, Etiqueta, acercade
 
 
 def barra_menu(master):
@@ -18,7 +20,7 @@ def barra_menu(master):
 	barra_menu.add_cascade(label = "Consultas")
 	barra_menu.add_cascade(label = "Confifuración")
 	barra_menu.add_cascade(label = "Ayuda")
-	barra_menu.add_cascade(label = "Acerca de")
+	barra_menu.add_cascade(label = "Acerca de", command= acercade)
 
 class MiFrame(tk.Frame):
 	def __init__(self, master: None):
@@ -35,72 +37,37 @@ class MiFrame(tk.Frame):
 
 	def campos_pelicula(self):
 		# Labels de los campos
-		self.label_nombre = tk.Label(self, text="Nombre: ")
-		self.label_nombre.config(font = ("Arial", 12,  "bold"))
-		self.label_nombre.grid(row = 0, column = 0, padx = 10, pady = 0)
+		self.label_nombre = Etiqueta(self, "Nombre",0 , 0)
 
-		self.label_duracion = tk.Label(self, text = "Duración: ")
-		self.label_duracion.config(font = ("Arial", 12, "bold"))
-		self.label_duracion.grid(row = 1, column = 0, padx = 10, pady = 10)
+		self.label_duracion = Etiqueta(self, "Duración",1 , 0)
 
-		self.label_genero = tk.Label(self, text = "Genero: ")
-		self.label_genero.config(font = ("Arial", 12, "bold"))
-		self.label_genero.grid(row = 2, column = 0, padx = 10, pady = 10)
+		self.label_genero =  Etiqueta(self, "Genero",2 , 0)
 
 		# Entrys de los campos
 		self.mi_nombre = tk.StringVar()
-		self.entry_nombre = tk.Entry(self, textvariable= self.mi_nombre)
-		self.entry_nombre.config(width = 50, font = ("Arial", 12))
-		self.entry_nombre.grid(row = 0, column = 1, padx = 10, pady = 10, columnspan = 2)
+		self.entry_nombre= CajaTexto(self, self.mi_nombre, 0, 1)
 
 		self.mi_duracion = tk.StringVar()
-		self.entry_duracion = tk.Entry(self, textvariable= self.mi_duracion)
-		self.entry_duracion.config(width=50, font=("Arial", 12))
-		self.entry_duracion.grid(row=1, column=1, padx=10, pady=10, columnspan=2)
+		self.entry_duracion = CajaTexto(self, self.mi_duracion, 1, 1)
 
 		self.mi_genero = tk.StringVar()
-		self.entry_genero = tk.Entry(self, textvariable= self.mi_genero)
-		self.entry_genero.config(width=50, font=("Arial", 12))
-		self.entry_genero.grid(row=2, column=1, padx=10, pady=10, columnspan=2)
+		self.entry_genero = CajaTexto(self, self.mi_genero, 2, 1)
 
 		#Botones
-		self.boton_nuevo = tk.Button(self, text="Nuevo")
-		self.boton_nuevo.config(
-			width=20,
-			font=("Arial", 12, "bold"),
-			fg="#DAD5D6", bg="#158645", 
-			cursor="hand2", 
-			activebackground="#35bd6f",
-			activeforeground="red",
-			command = self.habitar_campos
-			)
-		self.boton_nuevo.grid(row=3, column=0, padx=10, pady=10)
+		self.boton_nuevo= Boton(self, "Nuevo")
+		self.boton_nuevo.configuracion("#158645", "#DAD5D6","#35bd6f","red",self.habitar_campos)
+		self.boton_nuevo.grilla(3, 0)
 
-		self.boton_guardar = tk.Button(self, text="Guardar")
-		self.boton_guardar.config(
-			width=20,
-			font=("Arial", 12, "bold"),
-			fg="#DAD5D6", bg="#1658A2", 
-			cursor="hand2", 
-			activebackground="#3586df",
-			activeforeground="red",
-			command = self.guardar_datos
-			)
-		self.boton_guardar.grid(row=3, column=1, padx=10, pady=10)
+		self.boton_guardar= Boton(self, "Guardar")
+		self.boton_guardar.configuracion("#1658A2", "#DAD5D6","#3586df","red",self.guardar_datos)
+		self.boton_guardar.grilla(3, 1)
 
-		self.boton_cancelar = tk.Button(self, text="Cancelar")
-		self.boton_cancelar.config(
-			width=20,
-			font=("Arial", 12, "bold"),
-			fg="#DAD5D6", bg="#bd152e", 
-			cursor="hand2", 
-			activebackground="#e15370",
-			activeforeground="white",
-			command = self.deshabitar_campos
-			)
-		self.boton_cancelar.grid(row=3, column=2, padx=10, pady=10)
+		self.boton_cancelar = Boton(self, "Cancelar")
+		self.boton_cancelar.configuracion("#bd152e", "#DAD5D6","#e15370","white",self.deshabitar_campos)
+		self.boton_cancelar.grilla(3, 2)
 
 	def habitar_campos(self):
+
 		self.mi_nombre.set("")
 		self.mi_genero.set("")
 		self.mi_duracion.set("")
@@ -114,7 +81,7 @@ class MiFrame(tk.Frame):
 
 	def deshabitar_campos(self):
 		self.id_pelicula = None
-		
+
 		self.mi_nombre.set("")
 		self.mi_genero.set("")
 		self.mi_duracion.set("")
@@ -167,29 +134,13 @@ class MiFrame(tk.Frame):
 			self.tabla.insert("", 0, text=p[0], values=(p[1], p[2], p[3]))
 
 		#Botones
-		self.boton_editar = tk.Button(self, text="Editar")
-		self.boton_editar.config(
-			width=20,
-			font=("Arial", 12, "bold"),
-			fg="#DAD5D6", bg="#158645", 
-			cursor="hand2", 
-			activebackground="#35bd6f",
-			activeforeground="red",
-			command= self.editar_datos
-			)
-		self.boton_editar.grid(row=5, column=0, padx=10, pady=10)
+		self.boton_editar = Boton(self, "Editar")
+		self.boton_editar.configuracion("#158645", "#DAD5D6",  "#35bd6f","red",self.editar_datos)
+		self.boton_editar.grilla(5, 0)
 
-		self.boton_eliminar = tk.Button(self, text="Eliminar")
-		self.boton_eliminar.config(
-			width=20,
-			font=("Arial", 12, "bold"),
-			fg="#DAD5D6", bg="#bd152e", 
-			cursor="hand2", 
-			activebackground="#e15370",
-			activeforeground="white",
-			command=self.eliminar_datos
-			)
-		self.boton_eliminar.grid(row=5, column=2, padx=10, pady=10)
+		self.boton_eliminar= Boton(self, "Eliminar")
+		self.boton_eliminar.configuracion("#bd152e", "#DAD5D6","#e15370","white",self.eliminar_datos)
+		self.boton_eliminar.grilla(5, 2)
 
 	def editar_datos(self):
 		try:
@@ -220,3 +171,4 @@ class MiFrame(tk.Frame):
 			titulo = "Eliminar de datos"
 			mensaje = "No se ha seleccionado ningún registro"
 			messagebox.showerror(titulo, mensaje)
+
